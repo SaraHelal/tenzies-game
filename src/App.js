@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Dice from './components/Dice';
-import party from "party-js";
+import Confetti from 'react-confetti'
 
 function App() {
-  
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   const [allDices, setAllDices] = useState([])
   const [holdedDices, setHoldedDices] = useState([])
   const [resetAction , setResetAction] = useState(false) 
+  const [missionComplete , setMissionComplete] = useState(false)
+
   
   useEffect(()=>{
     const diceArr = []
@@ -28,6 +33,7 @@ function App() {
      }) 
      if(missionCompleted){
         setResetAction(true)
+        setMissionComplete(true)
         
      } 
       //holdedDicesToString === allDicesToString ? console.log('yes: ') : console.log('no')
@@ -61,6 +67,7 @@ function App() {
       setAllDices(oldDices=>oldDices.map(dice=> { return {...dice, holded:false}}))
       setHoldedDices([])
       setResetAction(false)
+      setMissionComplete(false)
       setAllDices(oldDices=>oldDices.map(dice=> { return {...dice , diceNumber: changeNumRandom()}}
         ))
     }
@@ -84,7 +91,7 @@ function App() {
       <Dice dice={dice} key={dice.id} holdedDices={handleHoldedDices}/>
     )
   })
- 
+
   return (
 
     <main>
@@ -94,8 +101,10 @@ function App() {
         { diceElements }
       </div>
       <button className='roll-btn' onClick={rollAction}>{resetAction ? 'Reset Game' : 'Roll'}</button>
-      <div className="party">Click me!</div> 
-     
+      { missionComplete && <Confetti
+      width={windowSize.width}
+      height={windowSize.height}
+    />}
     </main>
   );
 }
