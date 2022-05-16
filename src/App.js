@@ -1,26 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { nanoid } from 'nanoid'
 import './App.css';
 import Dice from './components/Dice';
 import Confetti from 'react-confetti'
 
 function App() {
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  })
-  const [allDices, setAllDices] = useState([])
+  
+  const [allDices, setAllDices] = useState(newDices())
   const [holdedDices, setHoldedDices] = useState([])
-  const [resetAction , setResetAction] = useState(false) 
   const [missionComplete , setMissionComplete] = useState(false)
 
-  
-  useEffect(()=>{
-    const diceArr = []
-    for(let i=1 ; i<11 ; i++){
-      diceArr.push({id: i , diceNumber: changeNumRandom(), holded: false})
+  function generateNewDie(){
+    return{
+      id:nanoid(),
+      diceNumber:Math.ceil(Math.random() * 6),
+      holded:false
     }
-    setAllDices(diceArr)
-  }, [])
+  }
+  function newDices(){
+    const newDice = []
+        for (let i = 0; i < 10; i++) {
+            newDice.push(generateNewDie())
+        }
+        return newDice
+  }
+  
+  
   useEffect(()=>{
     if(allDices.length && holdedDices.length === allDices.length){
       const holdedDicesArr= holdedDices.map(dice=>dice.diceNumber).sort()
@@ -32,11 +37,8 @@ function App() {
        return false
      }) 
      if(missionCompleted){
-        setResetAction(true)
         setMissionComplete(true)
-        
      } 
-      //holdedDicesToString === allDicesToString ? console.log('yes: ') : console.log('no')
       
     } 
   }, [holdedDices])
@@ -63,10 +65,9 @@ function App() {
  
   //Roll onClick change unholded dices
   const rollAction = function handleRoll(){
-    if(resetAction){
+    if(missionComplete){
       setAllDices(oldDices=>oldDices.map(dice=> { return {...dice, holded:false}}))
       setHoldedDices([])
-      setResetAction(false)
       setMissionComplete(false)
       setAllDices(oldDices=>oldDices.map(dice=> { return {...dice , diceNumber: changeNumRandom()}}
         ))
@@ -95,16 +96,13 @@ function App() {
   return (
 
     <main>
-      <h1>Tenzies</h1>
-      <p>Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
+      <h1>Tenzies Game</h1>
+      <p>{!missionComplete ? 'Roll until all dice are the same. Click each die to freeze it at its current value between rolls.':'Congratulations!'}</p>
       <div className='diceContainer'>
-        { diceElements }
+        {  diceElements }
       </div>
-      <button className='roll-btn' onClick={rollAction}>{resetAction ? 'Reset Game' : 'Roll'}</button>
-      { missionComplete && <Confetti
-      width={windowSize.width}
-      height={windowSize.height}
-    />}
+      <button className='roll-btn' onClick={rollAction}>{missionComplete ? 'Reset Game' : 'Roll'}</button>
+      { missionComplete && <Confetti />}
     </main>
   );
 }
